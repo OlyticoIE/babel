@@ -1,0 +1,16 @@
+on:
+  pull_request: {paths: ['**.go', 'go.mod', '.github/workflows/*']}
+  push:         {branches: ['main']}
+
+jobs:
+  staticcheck:
+    name:    'staticcheck'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@v6'
+      - uses: 'dominikh/staticcheck-action@v1'
+  test:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@v6'
+      - run:  'go test -race ./...'
