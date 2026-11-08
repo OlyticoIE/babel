@@ -1,8 +1,8 @@
-// Package getlang provides fast natural language detection for various languages
+// Package babel provides fast natural language detection.
 //
-// getlang compares input text to a characteristic profile of each supported language and
-// returns the language that best matches the input text
-package getlang
+// babel compares the text to a characteristic profile of each supported
+// language and returns the language that best matches the text.
+package babel
 
 import (
 	"math"

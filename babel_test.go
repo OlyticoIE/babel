@@ -1,4 +1,4 @@
-package getlang
+package babel
 
 import (
 	"testing"

@@ -1,13 +1,7 @@
-getlang provides fast natural language detection in Go.
-
-- Offline -- no internet connection required
-- Supports 29 languages
-- Provides ISO 639 language codes
-- Fast
+babel provides fast natural language detection in Go.
 
 Usage
 -----
-
 ```go
 package main
 
@@ -19,49 +13,49 @@ import (
 
 func main() {
 	var (
-		shortLang, shortConf = getlang.Detect("short text")
-		longLang, longConf   = getlang.Detect("this sentence is a bit longer")
+		shortLang, shortConfidence = getlang.Detect("short text")
+		longLang, longConfidence   = getlang.Detect("this sentence is a bit longer")
 	)
 
-	fmt.Println(shortLang, shortConf) // en 0.15062092062586865
-	fmt.Println(longLang, longConf)   // en 0.747458096413626
+	fmt.Println(shortLang, shortConfidence) // en 0.15062092062586865
+	fmt.Println(longLang, longConfidence)   // en 0.747458096413626
 }
 ```
 
 Supported Languages
 -------------------
 
-| Language       | ISO 639-1 |
-| -------------- | --------- |
-| Arabic         | ar        |
-| Bengali (Bangla) | bn      |
-| German         | de        |
-| Greek          | el        |
-| English        | en        |
-| Spanish        | es        |
-| French         | fr        |
-| Hebrew         | he        |
-| Hindi          | hi        |
-| Hungarian      | hu        |
-| Armenian       | hy        |
-| Gujarati       | gu        |
-| Italian        | it        |
-| Dutch          | nl        |
-| Polish         | pl        |
-| Portuguese     | pt        |
-| Punjabi        | pa        |
-| Japanese       | ja        |
-| Kannada        | ka        |
-| Korean         | ko        |
-| Tamil		     | ta        |
-| Telugu         | te        |
-| Tagalog        | tl        |
-| Thai           | th        |
-| Russian        | ru        |
-| Serbian        | sr        |
-| Vietnamese     | vi        |
-| Ukrainian      | uk        |
-| Chinese        | zh        |
+| Language         | ISO 639-1 |
+| ---------------- | --------- |
+| Arabic           | ar        |
+| Armenian         | hy        |
+| Bengali (Bangla) | bn        |
+| Chinese          | zh        |
+| Dutch            | nl        |
+| English          | en        |
+| French           | fr        |
+| German           | de        |
+| Greek            | el        |
+| Gujarati         | gu        |
+| Hebrew           | he        |
+| Hindi            | hi        |
+| Hungarian        | hu        |
+| Italian          | it        |
+| Japanese         | ja        |
+| Kannada          | ka        |
+| Korean           | ko        |
+| Polish           | pl        |
+| Portuguese       | pt        |
+| Punjabi          | pa        |
+| Russian          | ru        |
+| Serbian          | sr        |
+| Spanish          | es        |
+| Tagalog          | tl        |
+| Tamil		       | ta        |
+| Telugu           | te        |
+| Thai             | th        |
+| Ukrainian        | uk        |
+| Vietnamese       | vi        |
 
 Acknowledgements and Citations
 ------------------------------
