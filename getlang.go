@@ -5,126 +5,92 @@
 package getlang
 
 import (
-	"golang.org/x/text/language"
-	"golang.org/x/text/language/display"
-	"io"
-
 	"math"
 	"sort"
+	"strings"
 	"unicode"
 )
 
-const undeterminedRate int = 41
-const undetermined string = "und"
-const rescale = 0.5
-const scriptCountFactor int = 2
-const expOverflow = 7.09e+02
+const (
+	undeterminedRate  = 41
+	undetermined      = "und"
+	rescale           = 0.5
+	scriptCountFactor = 2
+	expOverflow       = 7.09e+02
+)
 
-var langs = map[string][]string{
-	"de":      de,
-	"en":      en,
-	"es":      es,
-	"fr":      fr,
-	"hi":      hi,
-	"hu":      hu,
-	"it":      it,
-	"nl":      nl,
-	"pl":      pl,
-	"pt":      pt,
-	"ru":      ru,
-	"sr-Latn": srLatin,
-	"sr-Cyrl": srCyr,
-	"tl":      tl,
-	"uk":      uk,
-	"vi":      vi,
-}
-
-var scripts = map[string][]*unicode.RangeTable{
-	"ar": {unicode.Arabic},
-	"bn": {unicode.Bengali},
-	"el": {unicode.Greek},
-	"gu": {unicode.Gujarati},
-	"he": {unicode.Hebrew},
-	"hy": {unicode.Armenian},
-	"ja": {unicode.Hiragana, unicode.Katakana},
-	"kn": {unicode.Kannada},
-	"ko": {unicode.Hangul},
-	"pa": {unicode.Gurmukhi},
-	"ta": {unicode.Tamil},
-	"te": {unicode.Telugu},
-	"th": {unicode.Thai},
-	"zh": {unicode.Han},
-}
-
-// Info is the language detection result
-type Info struct {
-	lang        string
-	probability float64
-	langTag     language.Tag
-}
-
-// Tag returns the language.Tag of the detected language
-func (info Info) Tag() language.Tag {
-	return info.langTag
-}
-
-// LanguageCode returns the ISO 639-1 code for the detected language
-func (info Info) LanguageCode() string {
-	codeLen := len(info.lang)
-	if codeLen < 4 {
-		return info.lang
+var (
+	langs = map[string][]string{
+		"de":      de,
+		"en":      en,
+		"es":      es,
+		"fr":      fr,
+		"hi":      hi,
+		"hu":      hu,
+		"it":      it,
+		"nl":      nl,
+		"pl":      pl,
+		"pt":      pt,
+		"ru":      ru,
+		"sr-Latn": srLatin,
+		"sr-Cyrl": srCyr,
+		"tl":      tl,
+		"uk":      uk,
+		"vi":      vi,
 	}
-	return info.lang[:2]
-}
+	scripts = map[string][]*unicode.RangeTable{
+		"ar": {unicode.Arabic},
+		"bn": {unicode.Bengali},
+		"el": {unicode.Greek},
+		"gu": {unicode.Gujarati},
+		"he": {unicode.Hebrew},
+		"hy": {unicode.Armenian},
+		"ja": {unicode.Hiragana, unicode.Katakana},
+		"kn": {unicode.Kannada},
+		"ko": {unicode.Hangul},
+		"pa": {unicode.Gurmukhi},
+		"ta": {unicode.Tamil},
+		"te": {unicode.Telugu},
+		"th": {unicode.Thai},
+		"zh": {unicode.Han},
+	}
+)
 
-// Confidence returns a measure of reliability for the language classification
+// Detetect the language, returns the ISO 639-1 code and confidence as [0, 1.0]
+// inclusive.
 //
-// The output value is in the range [0, 1.0] inclusive
-func (info Info) Confidence() float64 {
-	return info.probability
-}
+// [golang.org/x/text/language.Parse] can be used to get the language name from
+// the ISO code.
+func Detect[T string | []byte](text T) (string, float64) {
+	var t string
+	switch tt := any(text).(type) {
+	case string:
+		t = tt
+	case []byte:
+		t = string(tt)
+	}
 
-// LanguageName returns the English name of the detected language
-func (info Info) LanguageName() string {
-	return display.English.Tags().Name(info.langTag)
-}
-
-// SelfName returns the name of the language in the language itself
-func (info Info) SelfName() string {
-	return display.Self.Name(info.langTag)
-}
-
-// FromReader detects the language from an io.Reader
-//
-// This function will read all bytes until an EOF is reached
-func FromReader(reader io.Reader) (Info, error) {
-	bytes, err := io.ReadAll(reader)
-	return FromString(string(bytes)), err
-}
-
-// FromString detects the language from the given string
-func FromString(text string) Info {
-	langMatches := make(map[string]int)
-	langMatches[undetermined] = 1
-
-	trigs := sortedTrigs(text)
+	matches := map[string]int{undetermined: 1}
+	trigs := sortedTrigs(t)
 	for k, v := range langs {
-		matchWith(k, trigs, v, langMatches)
+		matchWith(k, trigs, v, matches)
 	}
-
 	for k, v := range scripts {
-		matchScript(k, text, langMatches, v...)
+		matchScript(k, t, matches, v...)
 	}
 
-	smx := softMax(langMatches)
-	maxk := maxKey(langMatches)
-	return Info{maxk, smx[maxk], language.MustParse(maxk)}
+	smx := softMax(matches)
+	lang := maxKey(matches)
+	langCode, _, _ := strings.Cut(lang, "-")
+	return langCode, smx[lang]
 }
 
 func softMax(mapping map[string]int) map[string]float64 {
-	softMaxMap := make(map[string]float64)
-	var denom float64
-	overflowed := false
+	var (
+		softMaxMap = make(map[string]float64)
+		denom      float64
+		overflowed = false
+	)
 	for _, v := range mapping {
 		denom += math.Exp(float64(v) * rescale)
 		if v > expOverflow {
@@ -142,12 +108,13 @@ func softMax(mapping map[string]int) map[string]float64 {
 }
 
 func maxKey(mapping map[string]int) string {
-	var max int
-	var key string
+	var (
+		max int
+		key string
+	)
 	for k, v := range mapping {
 		if v > max {
-			max = v
-			key = k
+			max, key = v, k
 		}
 	}
 	return key
@@ -181,16 +148,20 @@ func matchWith(langName string, trigs []trigram, langProfile []string, matches m
 }
 
 func countedTrigrams(text string) map[string]int {
-	trigrams := map[string]int{}
-	var txt []rune
-
+	var (
+		trigrams = map[string]int{}
+		txt      = make([]rune, 0, len(text)+1)
+	)
 	for _, r := range text {
 		txt = append(txt, unicode.ToLower(toTrigramChar(r)))
 	}
 	txt = append(txt, ' ')
 
-	r1, r2 := ' ', txt[0]
-	var r3 rune
+	var (
+		r1 = ' '
+		r2 = txt[0]
+		r3 rune
+	)
 	for i := 1; i < len(txt); i++ {
 		r3 = txt[i]
 		if !(r2 == ' ' && (r1 == ' ' || r3 == ' ')) {
@@ -213,10 +184,11 @@ type trigram struct {
 }
 
 func sortedTrigs(s string) []trigram {
-	counterMap := countedTrigrams(s)
-	trigrams := make([]trigram, len(counterMap))
-
-	var i int
+	var (
+		counterMap = countedTrigrams(s)
+		trigrams   = make([]trigram, len(counterMap))
+		i          int
+	)
 	for tg, count := range counterMap {
 		trigrams[i] = trigram{tg, count}
 		i++

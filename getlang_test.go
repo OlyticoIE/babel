@@ -1,7 +1,6 @@
 package getlang
 
 import (
-	"strings"
 	"testing"
 )
 
@@ -56,22 +55,13 @@ func TestText(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			test := func(have Info) {
-				if have.LanguageCode() != tt.wantLang {
-					t.Errorf("wrong language\nhave: %q\nwant: %q", have.LanguageCode(), tt.wantLang)
-				}
-				if have.Confidence() < tt.wantConfidence {
-					t.Errorf("confidence too lower\nhave: %v\nwant: %v", have.Confidence(), tt.wantConfidence)
-				}
+			have, haveConfidence := Detect(tt.in)
+			if have != tt.wantLang {
+				t.Errorf("wrong language\nhave: %q\nwant: %q", have, tt.wantLang)
 			}
-
-			test(FromString(tt.in))
-			r, err := FromReader(strings.NewReader(tt.in))
-			if err != nil {
-				t.Fatal(err)
+			if haveConfidence < tt.wantConfidence {
+				t.Errorf("confidence too lower\nhave: %v\nwant: %v", haveConfidence, tt.wantConfidence)
 			}
-			test(r)
-
 		})
 	}
 }

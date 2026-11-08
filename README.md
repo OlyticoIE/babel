@@ -17,13 +17,54 @@ import (
 	"go.olytico.com/getlang"
 )
 
-func main(){
-    info := getlang.FromString("Wszyscy ludzie rodzą się wolni i równi w swojej godności i prawach")
-    fmt.Println(info.LanguageCode(), info.Confidence())
+func main() {
+	var (
+		shortLang, shortConf = getlang.Detect("short text")
+		longLang, longConf   = getlang.Detect("this sentence is a bit longer")
+	)
+
+	fmt.Println(shortLang, shortConf) // en 0.15062092062586865
+	fmt.Println(longLang, longConf)   // en 0.747458096413626
 }
 ```
 
+Supported Languages
+-------------------
+
+| Language       | ISO 639-1 |
+| -------------- | --------- |
+| Arabic         | ar        |
+| Bengali (Bangla) | bn      |
+| German         | de        |
+| Greek          | el        |
+| English        | en        |
+| Spanish        | es        |
+| French         | fr        |
+| Hebrew         | he        |
+| Hindi          | hi        |
+| Hungarian      | hu        |
+| Armenian       | hy        |
+| Gujarati       | gu        |
+| Italian        | it        |
+| Dutch          | nl        |
+| Polish         | pl        |
+| Portuguese     | pt        |
+| Punjabi        | pa        |
+| Japanese       | ja        |
+| Kannada        | ka        |
+| Korean         | ko        |
+| Tamil		     | ta        |
+| Telugu         | te        |
+| Tagalog        | tl        |
+| Thai           | th        |
+| Russian        | ru        |
+| Serbian        | sr        |
+| Vietnamese     | vi        |
+| Ukrainian      | uk        |
+| Chinese        | zh        |
+
 Acknowledgements and Citations
 ------------------------------
-* Thanks to [abadojack](https://github.com/abadojack) for the trigram generation logic in whatlanggo
-* Cavnar, William B., and John M. Trenkle. "N-gram-based text categorization." Ann arbor mi 48113.2 (1994): 161-175.
+- This is forked from https://github.com/rylans/getlang
+- Thanks to https://github.com/abadojack for the trigram generation logic in whatlanggo
+- Cavnar, William B., and John M. Trenkle. "N-gram-based text categorization." Ann arbor mi 48113.2 (1994): 161-175.
