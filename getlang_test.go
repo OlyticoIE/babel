@@ -13,7 +13,7 @@ func TestEmptyStringFromReader(t *testing.T) {
 
 func TestEnglishPhraseFromBigReader(t *testing.T) {
 	largeText := ""
-	for i := 0; i < 800; i++ {
+	for range 800 {
 		largeText += "this is more language as you can see "
 	}
 	info, _ := FromReader(strings.NewReader(largeText))

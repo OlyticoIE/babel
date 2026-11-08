@@ -8,7 +8,7 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"
 	"io"
-	"io/ioutil"
+
 	"math"
 	"sort"
 	"unicode"
@@ -98,7 +98,7 @@ func (info Info) SelfName() string {
 //
 // This function will read all bytes until an EOF is reached
 func FromReader(reader io.Reader) (Info, error) {
-	bytes, err := ioutil.ReadAll(reader)
+	bytes, err := io.ReadAll(reader)
 	return FromString(string(bytes)), err
 }
 
