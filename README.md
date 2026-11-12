@@ -13,12 +13,12 @@ import (
 
 func main() {
 	var (
-		shortLang, shortConfidence = babel.Detect("short text")
-		longLang, longConfidence   = babel.Detect("this sentence is a bit longer")
+		script1, lang1, conf1 = babel.Detect("short text")
+		script2, lang2, conf2 = babel.Detect("this sentence is a bit longer")
 	)
 
-	fmt.Println(shortLang, shortConfidence) // en 0.15062092062586865
-	fmt.Println(longLang, longConfidence)   // en 0.747458096413626
+	fmt.Println(script1, lang1, conf1) // Latn en 0.15062092062586865
+	fmt.Println(script2, lang2, conf2) // Latn en 0.747458096413626
 }
 ```
 
