@@ -8,13 +8,13 @@ package main
 import (
 	"fmt"
 
-	"go.olytico.com/getlang"
+	"go.olytico.com/babel"
 )
 
 func main() {
 	var (
-		shortLang, shortConfidence = getlang.Detect("short text")
-		longLang, longConfidence   = getlang.Detect("this sentence is a bit longer")
+		shortLang, shortConfidence = babel.Detect("short text")
+		longLang, longConfidence   = babel.Detect("this sentence is a bit longer")
 	)
 
 	fmt.Println(shortLang, shortConfidence) // en 0.15062092062586865

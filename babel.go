@@ -11,50 +11,22 @@ import (
 	"unicode"
 )
 
-const (
-	undeterminedRate  = 41
-	undetermined      = "und"
-	rescale           = 0.5
-	scriptCountFactor = 2
-	expOverflow       = 7.09e+02
-)
-
-var (
-	langs = map[string][]string{
-		"de":      de,
-		"en":      en,
-		"es":      es,
-		"fr":      fr,
-		"hi":      hi,
-		"hu":      hu,
-		"it":      it,
-		"nl":      nl,
-		"pl":      pl,
-		"pt":      pt,
-		"ru":      ru,
-		"sr-Latn": srLatin,
-		"sr-Cyrl": srCyr,
-		"tl":      tl,
-		"uk":      uk,
-		"vi":      vi,
-	}
-	scripts = map[string][]*unicode.RangeTable{
-		"ar": {unicode.Arabic},
-		"bn": {unicode.Bengali},
-		"el": {unicode.Greek},
-		"gu": {unicode.Gujarati},
-		"he": {unicode.Hebrew},
-		"hy": {unicode.Armenian},
-		"ja": {unicode.Hiragana, unicode.Katakana},
-		"kn": {unicode.Kannada},
-		"ko": {unicode.Hangul},
-		"pa": {unicode.Gurmukhi},
-		"ta": {unicode.Tamil},
-		"te": {unicode.Telugu},
-		"th": {unicode.Thai},
-		"zh": {unicode.Han},
-	}
-)
+var scripts = map[string][]*unicode.RangeTable{
+	"ar": {unicode.Arabic},
+	"bn": {unicode.Bengali},
+	"el": {unicode.Greek},
+	"gu": {unicode.Gujarati},
+	"he": {unicode.Hebrew},
+	"hy": {unicode.Armenian},
+	"ja": {unicode.Hiragana, unicode.Katakana},
+	"kn": {unicode.Kannada},
+	"ko": {unicode.Hangul},
+	"pa": {unicode.Gurmukhi},
+	"ta": {unicode.Tamil},
+	"te": {unicode.Telugu},
+	"th": {unicode.Thai},
+	"zh": {unicode.Han},
+}
 
 // Detetect the language, returns the ISO 639-1 code and confidence as [0, 1.0]
 // inclusive.
@@ -70,7 +42,7 @@ func Detect[T string | []byte](text T) (string, float64) {
 		t = string(tt)
 	}
 
-	matches := map[string]int{undetermined: 1}
+	matches := map[string]int{"und": 1}
 	trigs := sortedTrigs(t)
 	for k, v := range langs {
 		matchWith(k, trigs, v, matches)
@@ -86,6 +58,10 @@ func Detect[T string | []byte](text T) (string, float64) {
 }
 
 func softMax(mapping map[string]int) map[string]float64 {
+	const (
+		rescale     = 0.5
+		expOverflow = 7.09e+02
+	)
 	var (
 		softMaxMap = make(map[string]float64)
 		denom      float64
@@ -123,25 +99,26 @@ func maxKey(mapping map[string]int) string {
 func matchScript(langName, text string, matches map[string]int, ranges ...*unicode.RangeTable) {
 	for _, r := range text {
 		if unicode.In(r, ranges...) {
-			matches[langName] += scriptCountFactor
+			matches[langName] += 2
 		}
 	}
 }
 
 func matchWith(langName string, trigs []trigram, langProfile []string, matches map[string]int) {
-	var undeterminedCount int
 	prof := make(map[string]int)
 	for _, x := range langProfile {
 		prof[x] = 1
 	}
 
+	const undeterminedRate = 41
+	var undeterminedCount int
 	for _, trig := range trigs {
 		if _, exists := prof[trig.trigram]; exists {
 			matches[langName] += trig.count
 		} else {
 			undeterminedCount++
 			if (undeterminedCount % undeterminedRate) == 0 {
-				matches[undetermined]++
+				matches["und"]++
 			}
 		}
 	}
